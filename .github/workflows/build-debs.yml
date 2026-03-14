@@ -15,7 +15,7 @@ jobs:
   camilladsp:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Download binary
         run: |
@@ -30,7 +30,7 @@ jobs:
           chmod 755 camilladsp/DEBIAN/postinst camilladsp/DEBIAN/prerm
           dpkg-deb --build camilladsp camilladsp_${CAMILLADSP_VER}_${DEB_ARCH}.deb
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: camilladsp-deb
           path: camilladsp_*.deb
@@ -38,7 +38,7 @@ jobs:
   camillagui:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Download bundle
         run: |
@@ -53,7 +53,7 @@ jobs:
           chmod 755 camillagui/DEBIAN/postinst camillagui/DEBIAN/prerm camillagui/DEBIAN/postrm
           dpkg-deb --build camillagui camillagui_${CAMILLAGUI_VER}_${DEB_ARCH}.deb
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: camillagui-deb
           path: camillagui_*.deb
@@ -62,13 +62,13 @@ jobs:
     runs-on: ubuntu-latest
     needs: [camilladsp, camillagui]
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           pattern: "*-deb"
           merge-multiple: true
           path: debs/
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: debs
           path: debs/
