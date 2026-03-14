@@ -1,0 +1,15 @@
+[Unit]
+Description=CamillaGUI web interface
+After=network.target camilladsp.service
+Wants=camilladsp.service
+
+[Service]
+Type=simple
+ExecStart=/opt/camillagui/camillagui_backend -c /etc/camillagui/camillagui.yml
+Restart=on-failure
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=camillagui
+
+[Install]
+WantedBy=multi-user.target

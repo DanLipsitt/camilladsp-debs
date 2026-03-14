@@ -1,0 +1,6 @@
+Package: camillagui
+Version: VERSION
+Architecture: armhf
+Maintainer: local
+Depends: camilladsp
+Description: CamillaGUI web interface for CamillaDSP

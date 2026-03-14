@@ -1,0 +1,57 @@
+name: Build .deb packages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  CAMILLADSP_VER: "3.0.1"
+  CAMILLAGUI_VER: "3.0.3"
+  ARCH: armv7
+  DEB_ARCH: armhf
+
+jobs:
+  camilladsp:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download binary
+        run: |
+          wget -q "https://github.com/HEnquist/camilladsp/releases/download/v${CAMILLADSP_VER}/camilladsp-linux-${ARCH}.tar.gz"
+          tar xf camilladsp-linux-${ARCH}.tar.gz
+          cp camilladsp camilladsp/usr/local/bin/
+
+      - name: Stamp version and build
+        run: |
+          sed -i "s/Version: VERSION/Version: ${CAMILLADSP_VER}/" camilladsp/DEBIAN/control
+          chmod 755 camilladsp/DEBIAN/postinst camilladsp/DEBIAN/prerm
+          dpkg-deb --build camilladsp camilladsp_${CAMILLADSP_VER}_${DEB_ARCH}.deb
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: camilladsp-deb
+          path: camilladsp_*.deb
+
+  camillagui:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download bundle
+        run: |
+          wget -q "https://github.com/HEnquist/camillagui-backend/releases/download/v${CAMILLAGUI_VER}/bundle_linux_${ARCH}.tar.gz"
+          tar xf bundle_linux_${ARCH}.tar.gz
+          cp -r camillagui_backend/* camillagui/opt/camillagui/
+
+      - name: Stamp version and build
+        run: |
+          sed -i "s/Version: VERSION/Version: ${CAMILLAGUI_VER}/" camillagui/DEBIAN/control
+          chmod 755 camillagui/DEBIAN/postinst camillagui/DEBIAN/prerm camillagui/DEBIAN/postrm
+          dpkg-deb --build camillagui camillagui_${CAMILLAGUI_VER}_${DEB_ARCH}.deb
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: camillagui-deb
+          path: camillagui_*.deb

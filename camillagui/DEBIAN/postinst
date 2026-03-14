@@ -1,0 +1,6 @@
+#!/bin/sh
+set -e
+mkdir -p /var/lib/camilladsp/configs /var/lib/camilladsp/coeffs /var/log/camilladsp
+systemctl daemon-reload
+systemctl enable camillagui
+systemctl start camillagui

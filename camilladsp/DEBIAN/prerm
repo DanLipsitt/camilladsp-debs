@@ -1,0 +1,4 @@
+#!/bin/sh
+set -e
+systemctl stop camilladsp || true
+systemctl disable camilladsp || true

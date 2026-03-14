@@ -1,0 +1,5 @@
+Package: camilladsp
+Version: VERSION
+Architecture: armhf
+Maintainer: local
+Description: CamillaDSP audio signal processor
