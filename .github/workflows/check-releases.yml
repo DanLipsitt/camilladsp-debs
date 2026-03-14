@@ -1,0 +1,60 @@
+name: Check for new releases
+
+on:
+  schedule:
+    - cron: "0 8 * * 1"  # Every Monday at 08:00 UTC
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get latest upstream versions
+        id: upstream
+        run: |
+          DSP=$(gh release view --repo HEnquist/camilladsp --json tagName -q '.tagName | ltrimstr("v")')
+          GUI=$(gh release view --repo HEnquist/camillagui-backend --json tagName -q '.tagName | ltrimstr("v")')
+          echo "dsp=$DSP" >> $GITHUB_OUTPUT
+          echo "gui=$GUI" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Get current versions
+        id: current
+        run: |
+          DSP=$(grep 'CAMILLADSP_VER:' .github/workflows/build-debs.yml | grep -o '".*"' | tr -d '"')
+          GUI=$(grep 'CAMILLAGUI_VER:' .github/workflows/build-debs.yml | grep -o '".*"' | tr -d '"')
+          echo "dsp=$DSP" >> $GITHUB_OUTPUT
+          echo "gui=$GUI" >> $GITHUB_OUTPUT
+
+      - name: Update versions and open PR
+        if: steps.upstream.outputs.dsp != steps.current.outputs.dsp || steps.upstream.outputs.gui != steps.current.outputs.gui
+        run: |
+          DSP_NEW=${{ steps.upstream.outputs.dsp }}
+          GUI_NEW=${{ steps.upstream.outputs.gui }}
+          DSP_OLD=${{ steps.current.outputs.dsp }}
+          GUI_OLD=${{ steps.current.outputs.gui }}
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b update-versions-${DSP_NEW}-${GUI_NEW}
+
+          sed -i "s/CAMILLADSP_VER: \"${DSP_OLD}\"/CAMILLADSP_VER: \"${DSP_NEW}\"/" .github/workflows/build-debs.yml
+          sed -i "s/CAMILLAGUI_VER: \"${GUI_OLD}\"/CAMILLAGUI_VER: \"${GUI_NEW}\"/" .github/workflows/build-debs.yml
+
+          git add .github/workflows/build-debs.yml
+          git commit -m "Update camilladsp ${DSP_OLD}→${DSP_NEW}, camillagui ${GUI_OLD}→${GUI_NEW}"
+          git push origin HEAD
+
+          gh pr create \
+            --title "Update camilladsp ${DSP_OLD}→${DSP_NEW}, camillagui ${GUI_OLD}→${GUI_NEW}" \
+            --body "Upstream releases detected. Versions updated automatically." \
+            --base main
+        env:
+          GH_TOKEN: ${{ github.token }}
