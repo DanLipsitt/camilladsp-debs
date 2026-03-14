@@ -19,6 +19,7 @@ jobs:
 
       - name: Download binary
         run: |
+          mkdir -p camilladsp/usr/local/bin
           wget -q "https://github.com/HEnquist/camilladsp/releases/download/v${CAMILLADSP_VER}/camilladsp-linux-${ARCH}.tar.gz"
           tar xf camilladsp-linux-${ARCH}.tar.gz --one-top-level=upstream
           cp upstream/camilladsp camilladsp/usr/local/bin/
@@ -41,6 +42,7 @@ jobs:
 
       - name: Download bundle
         run: |
+          mkdir -p camillagui/opt/camillagui
           wget -q "https://github.com/HEnquist/camillagui-backend/releases/download/v${CAMILLAGUI_VER}/bundle_linux_${ARCH}.tar.gz"
           tar xf bundle_linux_${ARCH}.tar.gz --one-top-level=upstream
           cp -r upstream/camillagui_backend/* camillagui/opt/camillagui/
